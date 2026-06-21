@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/auth/login/page": "/auth/login",
+  "/cart/page": "/cart",
+  "/checkout/page": "/checkout",
+  "/auth/sign-in/page": "/auth/sign-in",
+  "/browse/page": "/browse",
+  "/legal/refund/page": "/legal/refund",
+  "/legal/privacy/page": "/legal/privacy",
+  "/page": "/",
+  "/legal/terms/page": "/legal/terms",
+  "/book/[id]/page": "/book/[id]"
+}
