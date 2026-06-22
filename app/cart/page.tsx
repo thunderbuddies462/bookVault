@@ -29,19 +29,25 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pt-16">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-surface border border-line flex items-center justify-center mx-auto mb-6">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 0 1-8 0"/>
-            </svg>
-          </div>
+        <div className="text-center max-w-sm">
+          {/* Empty cart illustration */}
+          <svg className="mx-auto mb-6 opacity-20" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
           <h1 className="font-display text-3xl font-semibold text-primary mb-3">Your cart is empty</h1>
-          <p className="text-sm text-secondary mb-8">Browse our collection and add something to read.</p>
-          <Link href="/browse" className="inline-flex px-6 py-3 rounded-full bg-accent text-black text-sm font-semibold hover:bg-accent-alt transition-colors">
-            Browse books
-          </Link>
+          <p className="text-secondary mb-8 leading-relaxed">
+            Nothing here yet. Browse the collection, try a free sample, or check your wishlist.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
+            <Link href="/browse" className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-full bg-accent text-black text-sm font-semibold hover:bg-accent-alt transition-colors">
+              Browse books
+            </Link>
+            <Link href="/library" className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-full border border-line text-primary text-sm font-medium hover:border-accent/40 transition-colors">
+              My Library
+            </Link>
+          </div>
         </div>
       </div>
     )

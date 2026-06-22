@@ -1,8 +1,13 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { books, getBookById, getCoverUrl, type Genre } from '@/lib/books'
+import { books, getBookById } from '@/lib/books'
 import { AddToCart } from './AddToCart'
+import { Stars } from '@/components/Stars'
+import { WishlistButton } from '@/components/WishlistButton'
+import { BookCoverImage } from '@/components/BookCoverImage'
+import { getReviews, getAverageRating } from '@/lib/reviews'
+import { getSample } from '@/lib/samples'
+import { BookCard } from '@/components/BookCard'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -20,6 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${book.title} by ${book.author}`,
     description: book.description,
+    openGraph: {
+      title: `${book.title} — bookVault`,
+      description: book.description,
+      type: 'book',
+    },
   }
 }
 
@@ -39,17 +49,16 @@ export default async function BookPage({ params }: Props) {
   const book = getBookById(Number(id))
   if (!book) notFound()
 
-  const related = books
-    .filter((b) => b.genre === book.genre && b.id !== book.id)
-    .slice(0, 4)
+  const related  = books.filter((b) => b.genre === book.genre && b.id !== book.id).slice(0, 4)
+  const reviews  = getReviews(book.id)
+  const avgRating = getAverageRating(book.id) ?? book.rating
+  const sample   = getSample(book.id)
+  const readingMinutes = Math.round(book.pages * 1.5)
 
-  const displayYear = book.year < 0
-    ? `${Math.abs(book.year)} BC`
-    : String(book.year)
+  const displayYear = book.year < 0 ? `${Math.abs(book.year)} BC` : String(book.year)
 
   return (
     <div className="pt-20">
-      {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Back */}
@@ -67,18 +76,17 @@ export default async function BookPage({ params }: Props) {
 
           {/* Cover */}
           <div className="flex justify-center lg:justify-start">
-            <div
-              className="relative w-64 sm:w-80 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl shadow-black/60"
-              style={{ background: PALETTE_BG[book.palette] }}
-            >
-              <Image
-                src={getCoverUrl(book, 'L')}
-                alt={book.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 640px) 256px, 320px"
-              />
+            <div className="relative">
+              <div
+                className="relative w-64 sm:w-72 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl shadow-black/60"
+                style={{ background: PALETTE_BG[book.palette] }}
+              >
+                <BookCoverImage book={book} />
+              </div>
+              {/* Wishlist button */}
+              <div className="absolute top-3 right-3">
+                <WishlistButton bookId={book.id} />
+              </div>
             </div>
           </div>
 
@@ -90,22 +98,45 @@ export default async function BookPage({ params }: Props) {
             <h1 className="font-display text-4xl sm:text-5xl font-semibold text-primary text-balance mb-2">
               {book.title}
             </h1>
-            <p className="text-lg text-secondary mb-6">{book.author}</p>
+            <p className="text-lg text-secondary mb-4">{book.author}</p>
 
-            {/* Meta */}
-            <div className="flex flex-wrap gap-6 mb-8 pb-8 border-b border-line">
-              <div>
-                <p className="text-xs text-secondary uppercase tracking-wide mb-1">Rating</p>
-                <p className="text-sm font-medium text-primary">{book.rating.toFixed(1)} / 5</p>
-              </div>
+            {/* Stars + rating */}
+            <div className="flex items-center gap-3 mb-8">
+              <Stars rating={avgRating} size="md" showNumber count={reviews.length || undefined} />
+              {reviews.length > 0 && (
+                <a href="#reviews" className="text-xs text-secondary hover:text-accent transition-colors">
+                  {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                </a>
+              )}
+            </div>
+
+            {/* Meta strip */}
+            <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 pb-8 border-b border-line text-sm">
               <div>
                 <p className="text-xs text-secondary uppercase tracking-wide mb-1">Pages</p>
-                <p className="text-sm font-medium text-primary">{book.pages}</p>
+                <p className="font-medium text-primary">{book.pages}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary uppercase tracking-wide mb-1">Reading time</p>
+                <p className="font-medium text-primary">~{readingMinutes < 60 ? `${readingMinutes}m` : `${Math.round(readingMinutes / 60)}h`}</p>
               </div>
               <div>
                 <p className="text-xs text-secondary uppercase tracking-wide mb-1">Published</p>
-                <p className="text-sm font-medium text-primary">{displayYear}</p>
+                <p className="font-medium text-primary">{displayYear}</p>
               </div>
+              {sample && (
+                <div className="flex items-end">
+                  <Link
+                    href={`/read/${book.id}`}
+                    className="inline-flex items-center gap-1.5 text-accent text-sm font-medium hover:underline"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    Read free sample
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Description */}
@@ -118,34 +149,38 @@ export default async function BookPage({ params }: Props) {
           </div>
         </div>
 
+        {/* Reviews */}
+        {reviews.length > 0 && (
+          <div id="reviews" className="mt-24">
+            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-primary mb-6">
+              Reader reviews
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="rounded-xl border border-line bg-surface p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-medium text-primary text-sm">{review.name}</p>
+                      <p className="text-xs text-secondary">{review.date}</p>
+                    </div>
+                    <Stars rating={review.rating} size="sm" />
+                  </div>
+                  <p className="text-sm text-secondary leading-relaxed">{review.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Related books */}
         {related.length > 0 && (
           <div className="mt-24">
-            <h2 className="font-display text-3xl font-semibold text-primary mb-8">
+            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-primary mb-8">
               More {book.genre}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {related.map((b) => (
-                <Link key={b.id} href={`/book/${b.id}`} className="group block">
-                  <div className="overflow-hidden rounded-lg border border-line hover:border-accent/40 transition-all">
-                    <div
-                      className="relative aspect-[2/3]"
-                      style={{ background: PALETTE_BG[b.palette] }}
-                    >
-                      <Image
-                        src={getCoverUrl(b, 'M')}
-                        alt={b.title}
-                        fill
-                        className="object-cover"
-                        sizes="200px"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <p className="font-display text-sm font-semibold text-primary line-clamp-2">{b.title}</p>
-                      <p className="text-xs text-secondary mt-0.5">{b.author}</p>
-                    </div>
-                  </div>
-                </Link>
+                <BookCard key={b.id} book={b} />
               ))}
             </div>
           </div>

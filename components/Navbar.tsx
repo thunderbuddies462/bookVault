@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
+import { useWishlistStore } from '@/store/wishlist'
 import { CurrencySelector } from './CurrencySelector'
 import { ThemeToggle } from './ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -10,7 +11,8 @@ import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 
 export function Navbar() {
-  const itemCount = useCartStore((s) => s.items.length)
+  const itemCount    = useCartStore((s) => s.items.length)
+  const wishCount    = useWishlistStore((s) => s.ids.length)
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [genreOpen, setGenreOpen] = useState(false)
@@ -116,20 +118,34 @@ export function Navbar() {
               New Arrivals
             </Link>
 
-            {user && (
-              <Link
-                href="/cart"
-                className="px-3 py-2 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
-              >
-                My Library
-              </Link>
-            )}
+            <Link
+              href="/library"
+              className="px-3 py-2 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
+            >
+              My Library
+            </Link>
           </div>
 
           {/* Right controls */}
           <div className="flex items-center gap-0.5">
             <ThemeToggle />
             <CurrencySelector />
+
+            {/* Wishlist */}
+            <Link
+              href="/library"
+              className="relative p-2 text-secondary hover:text-primary transition-colors rounded-md hover:bg-elevated"
+              aria-label="Wishlist"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {wishCount > 0 && (
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-400 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                  {wishCount > 9 ? '9+' : wishCount}
+                </span>
+              )}
+            </Link>
 
             {/* Cart */}
             <Link
