@@ -39,6 +39,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/favourites" className="text-sm text-secondary hover:text-primary transition-colors">
+                  Favourites
+                </Link>
+              </li>
+              <li>
+                <Link href="/library" className="text-sm text-secondary hover:text-primary transition-colors">
+                  My Library
+                </Link>
+              </li>
+              <li>
                 <Link href="/auth/login" className="text-sm text-secondary hover:text-primary transition-colors">
                   Sign in
                 </Link>
@@ -74,9 +84,6 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-secondary">
             &copy; {new Date().getFullYear()} bookVault. All rights reserved.
-          </p>
-          <p className="text-xs text-secondary">
-            Prices in USD. Taxes may apply.
           </p>
         </div>
       </div>
