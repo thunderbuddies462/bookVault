@@ -54,7 +54,7 @@ export function AddToCart({ book }: AddToCartProps) {
             <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${selected === opt.type ? 'text-accent' : 'text-secondary'}`}>
               {opt.label}
             </p>
-            <p className="font-display text-lg font-semibold text-primary">
+            <p className="font-mono text-lg font-medium text-primary tabular-nums">
               {formatPrice(opt.price(book), country)}
             </p>
             <p className="text-[11px] text-secondary mt-0.5">{opt.sublabel}</p>

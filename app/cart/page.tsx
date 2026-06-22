@@ -80,7 +80,7 @@ export default function CartPage() {
                 </span>
               </div>
               <div className="flex flex-col items-end justify-between flex-shrink-0">
-                <p className="font-display text-lg font-semibold text-primary">
+                <p className="font-mono text-lg font-medium text-primary tabular-nums">
                   {formatPrice(item.usdPrice, country)}
                 </p>
                 <button
@@ -148,17 +148,17 @@ export default function CartPage() {
             <p className="text-sm font-medium text-primary mb-4">Order summary</p>
             <div className="flex justify-between text-sm">
               <span className="text-secondary">Subtotal ({items.length} item{items.length !== 1 ? 's' : ''})</span>
-              <span className="text-primary">{formatPrice(sub, country)}</span>
+              <span className="font-mono tabular-nums text-primary">{formatPrice(sub, country)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-green-400">Discount ({discount}%)</span>
-                <span className="text-green-400">-{formatPrice(savings, country)}</span>
+                <span className="font-mono tabular-nums text-green-400">-{formatPrice(savings, country)}</span>
               </div>
             )}
             <div className="border-t border-line pt-3 flex justify-between">
               <span className="font-medium text-primary">Total</span>
-              <span className="font-display text-xl font-semibold text-primary">{formatPrice(tot, country)}</span>
+              <span className="font-mono text-xl font-medium text-primary tabular-nums">{formatPrice(tot, country)}</span>
             </div>
             <Link
               href="/checkout"

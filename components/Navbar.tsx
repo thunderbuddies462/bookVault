@@ -1,9 +1,11 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { CurrencySelector } from './CurrencySelector'
+import { ThemeToggle } from './ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
+import { genres } from '@/lib/books'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 
@@ -11,7 +13,9 @@ export function Navbar() {
   const itemCount = useCartStore((s) => s.items.length)
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [genreOpen, setGenreOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const genreRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,6 +35,16 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handle)
   }, [])
 
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (genreRef.current && !genreRef.current.contains(e.target as Node)) {
+        setGenreOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
   async function signOut() {
     const supabase = createClient()
     if (supabase) await supabase.auth.signOut()
@@ -47,34 +61,80 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14 sm:h-16">
 
           {/* Brand */}
           <Link
             href="/"
-            className="font-display text-xl font-semibold tracking-tight text-primary"
+            className="font-display text-lg sm:text-xl font-semibold tracking-tight text-primary shrink-0"
           >
             bookVault
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1">
             <Link
               href="/browse"
-              className="text-sm text-secondary hover:text-primary transition-colors"
+              className="px-3 py-2 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
             >
               Browse
             </Link>
+
+            {/* Genres dropdown */}
+            <div ref={genreRef} className="relative">
+              <button
+                onClick={() => setGenreOpen(!genreOpen)}
+                className={`flex items-center gap-1 px-3 py-2 text-sm rounded-md transition-colors ${
+                  genreOpen ? 'text-primary bg-elevated' : 'text-secondary hover:text-primary hover:bg-elevated'
+                }`}
+              >
+                Genres
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform duration-200 ${genreOpen ? 'rotate-180' : ''}`}>
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {genreOpen && (
+                <div className="absolute left-0 top-full mt-2 w-44 bg-elevated border border-line rounded-lg shadow-2xl shadow-black/40 z-50 overflow-hidden animate-fade-in py-1">
+                  {genres.map((g) => (
+                    <Link
+                      key={g}
+                      href={`/browse?genre=${encodeURIComponent(g)}`}
+                      onClick={() => setGenreOpen(false)}
+                      className="block px-4 py-2 text-sm text-secondary hover:text-primary hover:bg-surface transition-colors"
+                    >
+                      {g}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/browse?sort=new"
+              className="px-3 py-2 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
+            >
+              New Arrivals
+            </Link>
+
+            {user && (
+              <Link
+                href="/cart"
+                className="px-3 py-2 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
+              >
+                My Library
+              </Link>
+            )}
           </div>
 
           {/* Right controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
+            <ThemeToggle />
             <CurrencySelector />
 
             {/* Cart */}
             <Link
               href="/cart"
-              className="relative p-2 text-secondary hover:text-primary transition-colors"
+              className="relative p-2 text-secondary hover:text-primary transition-colors rounded-md hover:bg-elevated"
               aria-label="Cart"
             >
               <BagIcon />
@@ -87,7 +147,7 @@ export function Navbar() {
 
             {/* Auth — desktop */}
             {user ? (
-              <div className="hidden md:flex items-center gap-3 ml-2">
+              <div className="hidden md:flex items-center gap-3 ml-1">
                 <span className="text-xs text-secondary truncate max-w-28">
                   {user.email?.split('@')[0]}
                 </span>
@@ -101,7 +161,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/auth/login"
-                className="hidden md:inline-flex ml-2 text-sm px-4 py-1.5 rounded-full bg-accent text-black font-medium hover:bg-accent-alt transition-colors"
+                className="hidden md:inline-flex ml-1 text-sm px-4 py-1.5 rounded-full bg-accent text-black font-semibold hover:bg-accent-alt transition-colors"
               >
                 Sign in
               </Link>
@@ -109,7 +169,7 @@ export function Navbar() {
 
             {/* Mobile menu toggle */}
             <button
-              className="md:hidden p-2 text-secondary hover:text-primary transition-colors"
+              className="md:hidden p-2 text-secondary hover:text-primary hover:bg-elevated rounded-md transition-colors"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
@@ -121,42 +181,77 @@ export function Navbar() {
 
       {/* Mobile drawer */}
       {menuOpen && (
-        <div className="md:hidden bg-surface border-b border-line">
-          <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
+        <div className="md:hidden bg-surface/95 backdrop-blur-xl border-b border-line">
+          <div className="max-w-7xl mx-auto px-4 py-3 space-y-0.5">
             <Link
               href="/browse"
-              className="block px-2 py-2 text-sm text-secondary hover:text-primary transition-colors"
+              className="flex items-center px-3 py-2.5 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-lg transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Browse
             </Link>
+
+            {/* Genres in mobile — show all as list */}
+            <div className="px-3 py-2.5">
+              <p className="text-xs font-medium uppercase tracking-widest text-secondary mb-2">Genres</p>
+              <div className="flex flex-wrap gap-1.5">
+                {genres.map((g) => (
+                  <Link
+                    key={g}
+                    href={`/browse?genre=${encodeURIComponent(g)}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="px-2.5 py-1 text-xs rounded-full border border-line text-secondary hover:text-primary hover:border-accent/40 transition-colors"
+                  >
+                    {g}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <Link
-              href="/cart"
-              className="block px-2 py-2 text-sm text-secondary hover:text-primary transition-colors"
+              href="/browse"
+              className="flex items-center px-3 py-2.5 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-lg transition-colors"
               onClick={() => setMenuOpen(false)}
             >
-              Cart {itemCount > 0 && `(${itemCount})`}
+              New Arrivals
             </Link>
-            <div className="pt-2 border-t border-line">
+
+            <Link
+              href="/cart"
+              className="flex items-center justify-between px-3 py-2.5 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-lg transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              <span>Cart</span>
+              {itemCount > 0 && (
+                <span className="w-5 h-5 bg-accent text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+
+            <div className="pt-2 mt-1 border-t border-line">
               {user ? (
-                <button
-                  onClick={() => { setMenuOpen(false); signOut() }}
-                  className="block w-full text-left px-2 py-2 text-sm text-secondary hover:text-primary transition-colors"
-                >
-                  Sign out
-                </button>
+                <>
+                  <p className="px-3 py-1.5 text-xs text-secondary truncate">{user.email}</p>
+                  <button
+                    onClick={() => { setMenuOpen(false); signOut() }}
+                    className="w-full text-left px-3 py-2.5 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-lg transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
                     href="/auth/login"
-                    className="block px-2 py-2 text-sm text-secondary hover:text-primary transition-colors"
+                    className="flex items-center px-3 py-2.5 text-sm text-secondary hover:text-primary hover:bg-elevated rounded-lg transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >
                     Log in
                   </Link>
                   <Link
                     href="/auth/sign-in"
-                    className="block px-2 py-2 text-sm text-accent font-medium hover:text-accent-alt transition-colors"
+                    className="flex items-center px-3 py-2.5 text-sm text-accent font-medium hover:bg-elevated rounded-lg transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >
                     Create account

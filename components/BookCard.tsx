@@ -4,13 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Book } from '@/lib/books'
 import { getCoverUrl } from '@/lib/books'
+import { useCurrencyStore } from '@/store/currency'
 import { formatPrice } from '@/lib/currency'
-import type { CountryCode } from '@/lib/currency'
-
-interface BookCardProps {
-  book: Book
-  country?: CountryCode
-}
 
 const PALETTE_BG: Record<string, string> = {
   ember:   'linear-gradient(135deg, #5c2510, #1a0a04)',
@@ -23,9 +18,10 @@ const PALETTE_BG: Record<string, string> = {
   slate:   'linear-gradient(135deg, #1e2d45, #080e1a)',
 }
 
-export function BookCard({ book, country = 'US' }: BookCardProps) {
+export function BookCard({ book }: { book: Book }) {
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError]   = useState(false)
+  const country = useCurrencyStore((s) => s.country)
 
   return (
     <Link href={`/book/${book.id}`} className="group block">
@@ -33,7 +29,6 @@ export function BookCard({ book, country = 'US' }: BookCardProps) {
 
         {/* Cover */}
         <div className="relative aspect-[2/3] overflow-hidden">
-          {/* Skeleton shimmer — visible until image loads */}
           <div
             className={`absolute inset-0 transition-opacity duration-300 ${imgLoaded ? 'opacity-0' : 'opacity-100'}`}
             style={{ background: PALETTE_BG[book.palette] }}
@@ -57,22 +52,22 @@ export function BookCard({ book, country = 'US' }: BookCardProps) {
         </div>
 
         {/* Info */}
-        <div className="p-3.5">
+        <div className="p-3 sm:p-3.5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[10px] font-medium uppercase tracking-widest text-accent">
               {book.genre}
             </span>
-            <span className="text-[10px] text-secondary">
+            <span className="text-[10px] text-secondary tabular-nums">
               {book.rating.toFixed(1)}
             </span>
           </div>
-          <h3 className="font-display text-base font-semibold text-primary leading-tight line-clamp-2 mb-0.5">
+          <h3 className="font-display text-sm sm:text-base font-semibold text-primary leading-tight line-clamp-2 mb-0.5">
             {book.title}
           </h3>
-          <p className="text-xs text-secondary mb-3">{book.author}</p>
-          <p className="text-sm font-medium text-primary">
+          <p className="text-xs text-secondary mb-3 truncate">{book.author}</p>
+          <p className="font-mono text-sm font-medium text-primary tabular-nums">
             {formatPrice(book.buyPrice, country)}
-            <span className="text-xs text-secondary font-normal ml-1">/ buy</span>
+            <span className="text-xs text-secondary font-normal ml-1 font-sans">/ buy</span>
           </p>
         </div>
       </div>

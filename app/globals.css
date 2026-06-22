@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base:         #09090b;
-  --color-surface:      #18181b;
-  --color-elevated:     #27272a;
-  --color-line:         #3f3f46;
-  --color-primary:      #fafafa;
-  --color-secondary:    #a1a1aa;
-  --color-accent:       #f59e0b;
-  --color-accent-alt:   #d97706;
+  --color-base:         #0c0a09;
+  --color-surface:      #171410;
+  --color-elevated:     #21201b;
+  --color-line:         #33302a;
+  --color-primary:      #f5f0ea;
+  --color-secondary:    #9e9284;
+  --color-accent:       #c9a448;
+  --color-accent-alt:   #a8832a;
 
   --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:    'DM Mono', 'JetBrains Mono', ui-monospace, monospace;
 
   --radius-sm:  4px;
   --radius-md:  8px;
@@ -20,10 +21,26 @@
   --radius-full: 9999px;
 }
 
+/* ── Light theme overrides ──────────────────────────────────── */
+[data-theme="light"] {
+  --color-base:         #faf6f0;
+  --color-surface:      #ffffff;
+  --color-elevated:     #f3ede4;
+  --color-line:         #e0d5c3;
+  --color-primary:      #1a1410;
+  --color-secondary:    #6b5c4a;
+  --color-accent:       #9a6f1a;
+  --color-accent-alt:   #7d5714;
+}
+
 @layer base {
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
   }
 
   body {
@@ -63,6 +80,10 @@
     font-family: var(--font-display);
   }
 
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -77,14 +98,8 @@
 }
 
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {

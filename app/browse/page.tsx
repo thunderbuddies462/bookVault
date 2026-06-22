@@ -2,7 +2,6 @@
 import { useState, useMemo } from 'react'
 import { books, genres, type Genre } from '@/lib/books'
 import { BookCard } from '@/components/BookCard'
-import { useCurrencyStore } from '@/store/currency'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -10,7 +9,6 @@ function BrowseContent() {
   const searchParams = useSearchParams()
   const initialGenre = searchParams.get('genre') as Genre | null
 
-  const { country } = useCurrencyStore()
   const [query, setQuery] = useState('')
   const [activeGenre, setActiveGenre] = useState<Genre | 'All'>(
     initialGenre && genres.includes(initialGenre) ? initialGenre : 'All'
@@ -87,7 +85,7 @@ function BrowseContent() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
           {filtered.map((book) => (
-            <BookCard key={book.id} book={book} country={country} />
+            <BookCard key={book.id} book={book} />
           ))}
         </div>
       )}
