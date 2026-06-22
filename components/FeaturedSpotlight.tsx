@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { Book } from '@/lib/books'
 import { getCoverUrl } from '@/lib/books'
 import { useCurrencyStore } from '@/store/currency'
@@ -32,13 +33,17 @@ export function FeaturedSpotlight({ hero, rest }: { hero: Book; rest: Book[] }) 
   const [imgError, setImgError] = useState(false)
   const country = useCurrencyStore((s) => s.country)
   const hasSample = Boolean(getSample(hero.id))
+  const router = useRouter()
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5">
-      {/* Hero book — large */}
-      <Link
-        href={`/book/${hero.id}`}
-        className="group lg:col-span-2 block overflow-hidden rounded-xl border border-line bg-surface hover:border-accent/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50"
+      {/* Hero book — large (div + onClick avoids nested <a>) */}
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={() => router.push(`/book/${hero.id}`)}
+        onKeyDown={(e) => e.key === 'Enter' && router.push(`/book/${hero.id}`)}
+        className="group lg:col-span-2 block overflow-hidden rounded-xl border border-line bg-surface hover:border-accent/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50 cursor-pointer"
       >
         <div className="flex flex-col h-full">
           {/* Cover */}
@@ -67,7 +72,7 @@ export function FeaturedSpotlight({ hero, rest }: { hero: Book; rest: Book[] }) 
               />
             )}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface to-transparent" />
-            <div className="absolute top-3 right-3" onClick={(e) => e.preventDefault()}>
+            <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
               <WishlistButton bookId={hero.id} />
             </div>
           </div>
@@ -85,18 +90,17 @@ export function FeaturedSpotlight({ hero, rest }: { hero: Book; rest: Book[] }) 
                 <span className="font-sans text-xs text-secondary ml-1">/ buy</span>
               </p>
               {hasSample && (
-                <Link
-                  href={`/read/${hero.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-xs text-accent hover:underline"
+                <button
+                  onClick={(e) => { e.stopPropagation(); router.push(`/read/${hero.id}`) }}
+                  className="text-xs text-accent hover:underline cursor-pointer"
                 >
                   Read sample →
-                </Link>
+                </button>
               )}
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Small grid */}
       <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-5 content-start">
