@@ -20,6 +20,7 @@ function LoginForm() {
     setLoading(true)
 
     const supabase = createClient()
+    if (!supabase) { setLoading(false); setError('Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.'); return }
     const { error: err } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
 
@@ -37,6 +38,7 @@ function LoginForm() {
       return
     }
     const supabase = createClient()
+    if (!supabase) { setError('Supabase not configured.'); return }
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset`,
     })

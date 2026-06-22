@@ -16,6 +16,7 @@ export function Navbar() {
 
   useEffect(() => {
     const supabase = createClient()
+    if (!supabase) return
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
@@ -32,7 +33,7 @@ export function Navbar() {
 
   async function signOut() {
     const supabase = createClient()
-    await supabase.auth.signOut()
+    if (supabase) await supabase.auth.signOut()
     router.push('/')
     router.refresh()
   }

@@ -28,6 +28,7 @@ export default function SignInPage() {
 
     setLoading(true)
     const supabase = createClient()
+    if (!supabase) { setLoading(false); setError('Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.'); return }
     const { error: err } = await supabase.auth.signUp({ email, password })
     setLoading(false)
 

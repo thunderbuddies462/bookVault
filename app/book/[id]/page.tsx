@@ -72,7 +72,7 @@ export default async function BookPage({ params }: Props) {
               style={{ background: PALETTE_BG[book.palette] }}
             >
               <Image
-                src={`{getCoverUrl(book, 'L')}`}
+                src={getCoverUrl(book, 'L')}
                 alt={book.title}
                 fill
                 className="object-cover"
